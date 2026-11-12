@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Digital Touchpad</title>
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Top Connection & Status Bar -->
+    <header class="status-bar">
+      <div class="status-left">
+        <div id="statusDot" class="status-dot"></div>
+        <span id="pcName" class="pc-title">Windows PC</span>
+      </div>
+      <div class="status-right">
+        <span id="latencyBadge" class="latency-badge">-- ms</span>
+        <button id="btBtn" class="icon-btn" title="Bluetooth & Devices">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+          </svg>
+        </button>
+        <button id="diagBtn" class="icon-btn" title="Diagnostics & Health">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </button>
+        <button id="fullscreenBtn" class="icon-btn" title="Fullscreen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+        <button id="settingsBtn" class="icon-btn" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Gesture Hints Pill -->
+    <div id="coachPill" class="coach-pill">
+      <div class="coach-items">
+        <span class="coach-item"><strong>1 finger</strong> Move</span>
+        <span class="coach-item"><strong>1 tap</strong> Click</span>
+        <span class="coach-item"><strong>2 fingers</strong> Scroll</span>
+        <span class="coach-item"><strong>2 tap</strong> Right click</span>
+        <span class="coach-item"><strong>Pinch</strong> Zoom</span>
+      </div>
+      <button id="closeCoachBtn" class="close-coach">&times;</button>
+    </div>
+
+    <!-- Main Touch Surface -->
+    <div class="touch-surface-wrapper">
+      <div id="touchpadSurface" class="touchpad-surface touch-surface">
+        <div id="dragBadge" class="drag-indicator">DRAGGING ACTIVE</div>
+        <div class="surface-center-ring"></div>
+        <span class="surface-label">Touch Surface</span>
+        <div id="gestureFeed" class="live-gesture-feed"></div>
+      </div>
+    </div>
+
+    <!-- Explicit Click Buttons -->
+    <div class="physical-buttons">
+      <button id="leftClickBtn" class="click-btn">Left Click</button>
+      <button id="rightClickBtn" class="click-btn">Right Click</button>
+    </div>
+
+    <!-- Bottom Action Dock Navigation -->
+    <nav class="dock-nav">
+      <button class="dock-tab active" data-tab="apps">Apps</button>
+      <button class="dock-tab" data-tab="media">Media</button>
+      <button class="dock-tab" data-tab="presenter">Presenter</button>
+      <button class="dock-tab" data-tab="power">Power</button>
+    </nav>
+
+    <!-- Tab Sheets -->
+    <!-- Sheet 1: Apps & Windows Shortcuts -->
+    <div id="sheet-apps" class="dock-sheet active">
+      <button class="action-pill" data-action="windows_search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Search</span>
+      </button>
+      <button class="action-pill" data-action="task_manager">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Task Mgr</span>
+      </button>
+      <button class="action-pill" data-action="file_explorer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span>Explorer</span>
+      </button>
+      <button class="action-pill" data-action="screenshot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Snip</span>
+      </button>
+      <button class="action-pill" data-action="show_desktop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Desktop</span>
+      </button>
+      <button class="action-pill" data-action="lock_workstation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Lock</span>
+      </button>
+    </div>
+
+    <!-- Sheet 2: Media & Brightness Controls -->
+    <div id="sheet-media" class="dock-sheet">
+      <button class="action-pill" data-action="vol_down">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="15" y1="12" x2="21" y2="12"/></svg>
+        <span>Vol -</span>
+      </button>
+      <button class="action-pill" data-action="vol_mute">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        <span>Mute</span>
+      </button>
+      <button class="action-pill" data-action="vol_up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        <span>Vol +</span>
+      </button>
+      <button class="action-pill" data-action="media_prev">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+        <span>Prev</span>
+      </button>
+      <button class="action-pill" data-action="media_playpause">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Play/Pause</span>
+      </button>
+      <button class="action-pill" data-action="media_next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        <span>Next</span>
+      </button>
+      <button class="action-pill" data-action="brightness_down">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+        <span>Bright -</span>
+      </button>
+      <button class="action-pill" data-action="brightness_up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <span>Bright +</span>
+      </button>
+      <button class="action-pill" data-action="media_fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <span>Fullscreen</span>
+      </button>
+    </div>
+
+    <!-- Sheet 3: Presenter Mode Deck (PRD Sec 08 & 18) -->
+    <div id="sheet-presenter" class="dock-sheet">
+      <button class="action-pill" data-action="presenter_prev" style="grid-column: span 1; height: 50px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <span>&larr; Prev</span>
+      </button>
+      <button class="action-pill" data-action="presenter_next" style="grid-column: span 2; height: 50px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--accent-cyan);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <strong style="color: var(--accent-cyan); font-size: 13px;">Next Slide &rarr;</strong>
+      </button>
+      <button class="action-pill" data-action="presenter_start">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>F5 SlideShow</span>
+      </button>
+      <button class="action-pill" data-action="presenter_black">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+        <span>Black (B)</span>
+      </button>
+      <button class="action-pill" data-action="presenter_end">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <span>End Show</span>
+      </button>
+    </div>
+
+    <!-- Sheet 4: Power Controls -->
+    <div id="sheet-power" class="dock-sheet">
+      <button class="action-pill" data-power="sleep">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span>Sleep</span>
+      </button>
+      <button class="action-pill danger" data-power="restart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>Restart</span>
+      </button>
+      <button class="action-pill danger" data-power="shutdown">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        <span>Shutdown</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Destructive Power Confirmation Modal (PRD Sec 09) -->
+  <div id="powerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3 id="powerModalTitle">System Power Action</h3>
+      <p id="powerModalDesc">Executing power action in:</p>
+      <div id="powerCountdown" class="countdown-badge">10</div>
+      <div class="modal-actions">
+        <button id="powerCancelBtn" class="btn-secondary">Cancel</button>
+        <button id="powerConfirmBtn" class="btn-danger">Execute Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bluetooth & Devices Connection Modal (PRD Mode B & Bluetooth PAN) -->
+  <div id="bluetoothModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+        </svg>
+        <h3 style="margin-bottom: 0;">Bluetooth & Devices</h3>
+      </div>
+      <p>Connect your phone and Windows PC over Bluetooth without needing a Wi-Fi router.</p>
+
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 10px; margin-bottom: 14px; text-align: left; font-size: 11px; line-height: 1.5;">
+        <strong style="color: #38bdf8;">Bluetooth Direct Network (No Wi-Fi Needed):</strong><br>
+        1. Pair phone to PC in <em>Windows Settings &rarr; Bluetooth</em>.<br>
+        2. Turn on <em>Bluetooth Tethering</em> on your phone.<br>
+        3. Connect to the receiver URL shown in the terminal!
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <button id="webBtScanBtn" class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>
+          Scan for Bluetooth Devices
+        </button>
+        <div id="btStatusMsg" style="font-size: 11px; color: #94a3b8; margin-top: 6px; min-height: 16px;"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="closeBtModalBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3>Touchpad Settings</h3>
+      <div class="settings-group">
+        <label>Pointer Sensitivity <span id="sensVal">1.4x</span></label>
+        <input type="range" id="sensSlider" class="settings-slider" min="0.5" max="3.0" step="0.1" value="1.4">
+      </div>
+      <div class="settings-group">
+        <label>Scroll Speed <span id="scrollVal">1.0x</span></label>
+        <input type="range" id="scrollSlider" class="settings-slider" min="0.5" max="3.0" step="0.1" value="1.0">
+      </div>
+      <div class="settings-group">
+        <label><input type="checkbox" id="naturalScrollToggle" checked> Natural Scrolling</label>
+      </div>
+      <div class="settings-group">
+        <label><input type="checkbox" id="hapticsToggle" checked> Haptic Feedback</label>
+      </div>
+      <div class="settings-group">
+        <label><input type="checkbox" id="wakeLockToggle" checked> Prevent Screen Dimming (Wake Lock)</label>
+      </div>
+      <div class="settings-group">
+        <label><input type="checkbox" id="highContrastToggle"> High Contrast Mode (Accessibility)</label>
+      </div>
+      <div class="modal-actions">
+        <button id="closeSettingsBtn" class="btn-primary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagnostics & Health Modal (PRD Section 15 & AT-016) -->
+  <div id="diagModal" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 400px; text-align: left;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        <h3 style="margin: 0; color: #f8fafc;">Diagnostics & Health</h3>
+      </div>
+      <div id="diagContent" style="font-size: 11px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; line-height: 1.6; color: #cbd5e1; max-height: 220px; overflow-y: auto; font-family: monospace;">
+        Loading diagnostic metrics...
+      </div>
+      <div style="margin-top: 14px; display: flex; gap: 8px;">
+        <button id="exportDiagBtn" class="btn-primary" style="flex: 1; font-size: 12px;">Export Log</button>
+        <button id="closeDiagModalBtn" class="btn-secondary" style="flex: 1; font-size: 12px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cloud Connection / Manual PC IP Modal (For Vercel Hosting) -->
+  <div id="pcIpModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <h3 style="margin-bottom: 0;">Connect to Windows PC</h3>
+      </div>
+      <p>Enter your PC's IP address (shown in the receiver terminal on your computer):</p>
+
+      <div style="margin-bottom: 16px;">
+        <input type="text" id="pcIpInput" placeholder="e.g. 192.168.1.100:8000" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid var(--accent-cyan); border-radius: 8px; color: white; font-size: 14px; text-align: center;">
+      </div>
+
+      <div class="modal-actions">
+        <button id="savePcIpBtn" class="btn-primary">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/protocol.js"></script>
+  <script src="js/gesture-engine.js"></script>
+  <script src="js/quick-actions.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+

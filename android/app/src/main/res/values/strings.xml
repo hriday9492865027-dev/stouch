@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Digital Touchpad</string>
+    <string name="bt_connecting">Connecting to PC…</string>
+    <string name="bt_connected">Connected via Bluetooth HID</string>
+    <string name="bt_disconnected">Bluetooth Disconnected</string>
+    <string name="bt_unsupported">Bluetooth HID Peripheral role not supported on this phone</string>
+</resources>
+
