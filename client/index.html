@@ -12,7 +12,43 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="app-container">
+  <!-- Desktop Landing Banner & Download (For PC/Laptop Visitors) -->
+  <div id="desktopBanner" class="desktop-banner">
+    <div class="banner-content">
+      <div class="banner-badge">UNIVERSAL WIRELESS TOUCHPAD</div>
+      <h1>Turn your phone into a precision trackpad for your PC.</h1>
+      <p>No extra hardware, no dongles. Just a 24 KB portable receiver on your computer and this zero-install web app on your phone.</p>
+      
+      <div class="banner-actions">
+        <a href="download/STouch.exe" download="STouch.exe" class="btn-download">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download for Windows (.exe)
+        </a>
+        <button id="openWebPadBtn" class="btn-secondary-link">Open Touchpad UI &rarr;</button>
+      </div>
+      <div class="banner-meta">Version 2.0 • Portable 24 KB • Windows 10 & 11 Ready</div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h4>Download & Run</h4>
+          <p>Download STouch.exe and double-click it. Zero setup needed.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h4>Scan QR Code</h4>
+          <p>Scan the on-screen QR code with your phone camera.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h4>Touch & Present</h4>
+          <p>Control your PC cursor, slides, and media from anywhere in the room!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="appContainer" class="app-container">
 
     <!-- Top Connection & Status Bar -->
     <header class="status-bar">

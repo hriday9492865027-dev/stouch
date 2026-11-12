@@ -290,7 +290,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 11. Screen Wake Lock (Prevent phone screen dimming while using touchpad)
+  // 11. Desktop Landing Banner Dismiss
+  const desktopBanner = document.getElementById('desktopBanner');
+  const openWebPadBtn = document.getElementById('openWebPadBtn');
+  if (openWebPadBtn && desktopBanner) {
+    openWebPadBtn.addEventListener('click', () => {
+      desktopBanner.classList.add('dismissed');
+    });
+  }
+
+  // 12. Screen Wake Lock (Prevent phone screen dimming while using touchpad)
   async function requestWakeLock() {
     if ('wakeLock' in navigator) {
       try {

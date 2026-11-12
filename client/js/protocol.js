@@ -39,7 +39,13 @@ class TouchpadProtocol {
                             !loc.hostname.startsWith('10.') &&
                             !loc.hostname.startsWith('172.');
 
-      const savedPcIp = localStorage.getItem('stouch_pc_ip');
+      // Check query parameter from QR code scan: e.g. ?pc=192.168.1.100:8000
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryPc = urlParams.get('pc');
+      if (queryPc) {
+        localStorage.setItem('stouch_pc_ip', queryPc);
+      }
+      const savedPcIp = queryPc || localStorage.getItem('stouch_pc_ip');
 
       if (isCloudHosted) {
         if (savedPcIp) {
