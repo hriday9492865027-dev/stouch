@@ -325,20 +325,26 @@
 
   <!-- Cloud Connection / Manual PC IP Modal (For Vercel Hosting) -->
   <div id="pcIpModal" class="modal-overlay hidden">
-    <div class="modal-card">
+    <div class="modal-card" style="position: relative;">
+      <button id="closePcIpModalBtn" class="close-coach" style="position: absolute; top: 12px; right: 14px; font-size: 22px;">&times;</button>
       <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
         </svg>
         <h3 style="margin-bottom: 0;">Connect to Windows PC</h3>
       </div>
-      <p>Enter your PC's IP address (shown in the receiver terminal on your computer):</p>
+      <p style="margin-bottom: 10px;">Enter your PC's IP address (shown in STouch on your computer):</p>
 
-      <div style="margin-bottom: 16px;">
+      <div style="margin-bottom: 12px;">
         <input type="text" id="pcIpInput" placeholder="e.g. 192.168.1.100:8000" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid var(--accent-cyan); border-radius: 8px; color: white; font-size: 14px; text-align: center;">
       </div>
 
+      <p style="font-size: 11px; color: #64748b; margin-bottom: 14px;">
+        Tip: Open <strong>STouch.exe</strong> on your PC and scan its QR code with your phone camera to connect automatically!
+      </p>
+
       <div class="modal-actions">
+        <button id="cancelPcIpBtn" class="btn-secondary">Close</button>
         <button id="savePcIpBtn" class="btn-primary">Connect</button>
       </div>
     </div>

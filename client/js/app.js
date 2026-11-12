@@ -18,14 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
         statusDot.classList.add('connected');
         pcName.textContent = (payload && payload.host_name) ? payload.host_name : 'Windows PC (Connected)';
       } else if (state === 'need_pc_ip') {
+        const desktopBanner = document.getElementById('desktopBanner');
+        const isDesktopVisible = desktopBanner && window.innerWidth >= 769 && !desktopBanner.classList.contains('dismissed');
         const pcIpModal = document.getElementById('pcIpModal');
         const pcIpInput = document.getElementById('pcIpInput');
-        if (pcIpModal) {
+        if (pcIpModal && !isDesktopVisible) {
           pcIpModal.classList.remove('hidden');
           const saved = localStorage.getItem('stouch_pc_ip');
           if (saved && pcIpInput) pcIpInput.value = saved;
         }
-        pcName.textContent = 'Enter PC IP...';
+        pcName.textContent = 'Disconnected (Tap to Connect)';
       } else if (state === 'pairing_required') {
         statusDot.classList.add('pairing');
         pcName.textContent = 'Pairing Required...';
@@ -278,6 +280,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const pcIpModal = document.getElementById('pcIpModal');
   const pcIpInput = document.getElementById('pcIpInput');
   const savePcIpBtn = document.getElementById('savePcIpBtn');
+  const closePcIpModalBtn = document.getElementById('closePcIpModalBtn');
+  const cancelPcIpBtn = document.getElementById('cancelPcIpBtn');
+
+  if (closePcIpModalBtn && pcIpModal) {
+    closePcIpModalBtn.addEventListener('click', () => pcIpModal.classList.add('hidden'));
+  }
+  if (cancelPcIpBtn && pcIpModal) {
+    cancelPcIpBtn.addEventListener('click', () => pcIpModal.classList.add('hidden'));
+  }
+
+  // Tap status bar to open connection modal
+  const statusLeft = document.querySelector('.status-left');
+  if (statusLeft && pcIpModal) {
+    statusLeft.addEventListener('click', () => {
+      pcIpModal.classList.remove('hidden');
+      const saved = localStorage.getItem('stouch_pc_ip');
+      if (saved && pcIpInput) pcIpInput.value = saved;
+    });
+  }
 
   if (savePcIpBtn) {
     savePcIpBtn.addEventListener('click', () => {
