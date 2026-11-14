@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F172A"
+    android:padding="16dp">
+
+    <!-- Status Bar -->
+    <LinearLayout
+        android:id="@+id/statusBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_card"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+
+        <View
+            android:id="@+id/statusDot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/status_dot_red" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:text="Not Connected (Bluetooth)"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnPairPC"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Pair PC"
+            android:textColor="#0F172A"
+            android:textSize="12sp"
+            android:background="@drawable/btn_cyan"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp" />
+    </LinearLayout>
+
+    <!-- Touchpad Surface -->
+    <View
+        android:id="@+id/touchpadSurface"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/statusBar"
+        android:layout_above="@id/buttonRow"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/touchpad_bg" />
+
+    <!-- Touchpad Hint (overlaid on surface) -->
+    <TextView
+        android:id="@+id/touchpadHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Tap: Left Click • Drag: Move Cursor"
+        android:textColor="#475569"
+        android:textSize="13sp" />
+
+    <!-- Bottom Button Row -->
+    <LinearLayout
+        android:id="@+id/buttonRow"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnLeftClick"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="Left Click"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:background="@drawable/rounded_card" />
+
+        <Button
+            android:id="@+id/btnRightClick"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="Right Click"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:background="@drawable/rounded_card" />
+    </LinearLayout>
+
+</RelativeLayout>
+

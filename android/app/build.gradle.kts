@@ -1,9 +1,4 @@
 plugins {
-    alias(libs.plugins.android.application) apply false
-}
-
-// Android Module Configuration
-plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
@@ -11,18 +6,14 @@ plugins {
 android {
     namespace = "com.stouch.touchpad"
     compileSdk = 34
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "com.stouch.touchpad"
-        minSdk = 28 // API 28 is the Android baseline for BluetoothHidDevice
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "2.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     buildTypes {
@@ -41,27 +32,8 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2024.02.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    // Zero AndroidX dependencies — using only Android framework APIs
 }
-

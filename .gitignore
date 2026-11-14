@@ -8,6 +8,20 @@ dist/
 build/
 *.egg-info/
 
+# Root binary build outputs
+/STouch.apk
+
+# Android build & SDK
+android/.gradle/
+android/app/build/
+android_sdk/
+android/local.properties
+.gradle/
+
+# IDE & Editor
+.vscode/
+.idea/
+
 # Vercel
 .vercel
 
@@ -15,5 +29,3 @@ build/
 .DS_Store
 Thumbs.db
 desktop.ini
-
-.vercel
