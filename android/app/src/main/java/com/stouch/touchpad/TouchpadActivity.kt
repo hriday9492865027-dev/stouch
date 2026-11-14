@@ -3,12 +3,16 @@ package com.stouch.touchpad
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHidDevice
 import android.bluetooth.BluetoothHidDeviceAppSdpSettings
 import android.bluetooth.BluetoothProfile
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -39,7 +43,7 @@ class TouchpadActivity : Activity() {
             0x85.toByte(), 0x01.toByte(), //   Report ID (1)
             0x09.toByte(), 0x01.toByte(), //   Usage (Pointer)
             0xA1.toByte(), 0x00.toByte(), //   Collection (Physical)
-            // 3 Buttons
+            // 3 Buttons (Left, Right, Middle)
             0x05.toByte(), 0x09.toByte(), //     Usage Page (Buttons)
             0x19.toByte(), 0x01.toByte(), //     Usage Minimum (1)
             0x29.toByte(), 0x03.toByte(), //     Usage Maximum (3)
@@ -103,6 +107,29 @@ class TouchpadActivity : Activity() {
     private var twoFingerActive = false
     private var lastTwoFingerY = 0f
 
+    // BroadcastReceiver for Bluetooth bonding events
+    private val bluetoothReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action ?: return
+            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == action) {
+                val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                }
+                val bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE)
+                if (bondState == BluetoothDevice.BOND_BONDED && device != null) {
+                    Log.d(TAG, "Device bonded: ${device.name}. Initiating HID connection...")
+                    runOnUiThread {
+                        Toast.makeText(this@TouchpadActivity, "Paired with ${device.name}! Connecting...", Toast.LENGTH_SHORT).show()
+                    }
+                    connectToHost(device)
+                }
+            }
+        }
+    }
+
     // ---- Bluetooth HID Callbacks ----
 
     private val serviceListener = object : BluetoothProfile.ServiceListener {
@@ -129,12 +156,16 @@ class TouchpadActivity : Activity() {
         override fun onAppStatusChanged(pluggedDevice: BluetoothDevice?, registered: Boolean) {
             super.onAppStatusChanged(pluggedDevice, registered)
             isRegistered = registered
-            Log.d(TAG, "HID App registration: $registered")
+            Log.d(TAG, "HID App registration: $registered, pluggedDevice: ${pluggedDevice?.name}")
             if (registered) {
                 runOnUiThread {
-                    Toast.makeText(this@TouchpadActivity,
-                        "✓ Bluetooth HID Mouse registered! Open Bluetooth settings on your PC and connect to this phone.",
-                        Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@TouchpadActivity, "✓ Bluetooth HID Mouse ready", Toast.LENGTH_SHORT).show()
+                }
+                // If there's already a plugged device or paired device, try to connect
+                if (pluggedDevice != null) {
+                    connectToHost(pluggedDevice)
+                } else {
+                    autoConnectPairedHost()
                 }
             }
         }
@@ -145,14 +176,45 @@ class TouchpadActivity : Activity() {
                 BluetoothProfile.STATE_CONNECTED -> {
                     Log.d(TAG, "Connected to: ${device?.name} (${device?.address})")
                     connectedHost = device
-                    runOnUiThread { updateUI(true, device) }
+                    runOnUiThread {
+                        Toast.makeText(this@TouchpadActivity, "Connected to ${device?.name ?: "PC"}!", Toast.LENGTH_SHORT).show()
+                        updateUI(true, device)
+                    }
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     Log.d(TAG, "Disconnected from: ${device?.name}")
                     if (connectedHost == device) connectedHost = null
                     runOnUiThread { updateUI(false, null) }
                 }
+                BluetoothProfile.STATE_CONNECTING -> {
+                    runOnUiThread {
+                        statusText.text = "Connecting to ${device?.name ?: "PC"}..."
+                    }
+                }
             }
+        }
+
+        override fun onGetReport(device: BluetoothDevice?, type: Byte, id: Byte, bufferSize: Int) {
+            super.onGetReport(device, type, id, bufferSize)
+            if (device != null) {
+                if (type == BluetoothHidDevice.REPORT_TYPE_INPUT && id == 1.toByte()) {
+                    hidDevice?.replyReport(device, type, id, byteArrayOf(0, 0, 0, 0))
+                } else {
+                    hidDevice?.reportError(device, BluetoothHidDevice.ERROR_RSP_UNSUPPORTED_REQ)
+                }
+            }
+        }
+
+        override fun onSetReport(device: BluetoothDevice?, type: Byte, id: Byte, data: ByteArray?) {
+            super.onSetReport(device, type, id, data)
+            if (device != null) {
+                hidDevice?.reportError(device, BluetoothHidDevice.ERROR_RSP_SUCCESS)
+            }
+        }
+
+        override fun onSetProtocol(device: BluetoothDevice?, protocol: Byte) {
+            super.onSetProtocol(device, protocol)
+            Log.d(TAG, "onSetProtocol: $protocol")
         }
     }
 
@@ -175,7 +237,7 @@ class TouchpadActivity : Activity() {
         btnRightClick = findViewById(R.id.btnRightClick)
 
         btnPairPC.setOnClickListener {
-            startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+            handleConnectButtonClick()
         }
 
         btnLeftClick.setOnClickListener {
@@ -191,7 +253,69 @@ class TouchpadActivity : Activity() {
         }
 
         setupTouchpad()
+        registerReceiver(bluetoothReceiver, IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED))
         checkAndRequestPermissions()
+    }
+
+    private fun handleConnectButtonClick() {
+        if (connectedHost != null) {
+            // Already connected -> Disconnect
+            hidDevice?.disconnect(connectedHost)
+            connectedHost = null
+            updateUI(false, null)
+            return
+        }
+
+        val bonded = bluetoothAdapter?.bondedDevices?.toList() ?: emptyList()
+        if (bonded.isEmpty()) {
+            Toast.makeText(this, "No paired PC found. Please pair with Windows first.", Toast.LENGTH_LONG).show()
+            startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+            return
+        }
+
+        // Show paired devices dialog
+        val deviceNames = bonded.map { it.name ?: it.address }.toTypedArray()
+        val options = deviceNames + "➕ Pair New Device..."
+
+        AlertDialog.Builder(this)
+            .setTitle("Select your PC to Connect")
+            .setItems(options) { _, which ->
+                if (which < bonded.size) {
+                    val target = bonded[which]
+                    connectToHost(target)
+                } else {
+                    startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun connectToHost(device: BluetoothDevice) {
+        val hid = hidDevice
+        if (hid == null) {
+            Toast.makeText(this, "Bluetooth HID not ready yet. Please wait.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        statusText.text = "Connecting to ${device.name}..."
+        val initiated = hid.connect(device)
+        Log.d(TAG, "hid.connect(${device.name}) initiated: $initiated")
+        if (!initiated) {
+            Toast.makeText(this, "Connecting to ${device.name}...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun autoConnectPairedHost() {
+        val bonded = bluetoothAdapter?.bondedDevices ?: return
+        for (device in bonded) {
+            val name = (device.name ?: "").uppercase()
+            // Look for typical computer names
+            if (name.contains("DESKTOP") || name.contains("LAPTOP") || name.contains("PC") || name.contains("WINDOWS")) {
+                Log.d(TAG, "Auto-connecting to paired PC: ${device.name}")
+                connectToHost(device)
+                break
+            }
+        }
     }
 
     private fun setupTouchpad() {
@@ -220,7 +344,7 @@ class TouchpadActivity : Activity() {
                     if (twoFingerActive && event.pointerCount >= 2) {
                         // Two-finger scroll
                         val avgY = (event.getY(0) + event.getY(1)) / 2f
-                        val scrollDelta = (lastTwoFingerY - avgY) * 0.3f
+                        val scrollDelta = (lastTwoFingerY - avgY) * 0.35f
                         val wheel = scrollDelta.toInt().coerceIn(-127, 127)
                         if (wheel != 0) {
                             sendMouseReport(0, 0, BUTTON_NONE, wheel)
@@ -353,13 +477,15 @@ class TouchpadActivity : Activity() {
         if (connected) {
             statusDot.setBackgroundResource(R.drawable.status_dot_green)
             statusText.text = device?.name ?: device?.address ?: "Connected"
-            btnPairPC.visibility = View.GONE
-            touchpadHint.text = "Touchpad Active — move your finger"
+            btnPairPC.text = "Disconnect"
+            btnPairPC.visibility = View.VISIBLE
+            touchpadHint.text = "Touchpad Active — glide finger to move cursor"
         } else {
             statusDot.setBackgroundResource(R.drawable.status_dot_red)
             statusText.text = "Not Connected (Bluetooth)"
+            btnPairPC.text = "Connect PC"
             btnPairPC.visibility = View.VISIBLE
-            touchpadHint.text = "Tap: Left Click • Drag: Move Cursor"
+            touchpadHint.text = "Tap 'Connect PC' above to connect to your PC"
         }
     }
 
@@ -380,11 +506,13 @@ class TouchpadActivity : Activity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        sendMouseReport(0, 0, BUTTON_NONE, 0) // release all buttons
+        try {
+            unregisterReceiver(bluetoothReceiver)
+        } catch (_: Exception) {}
+        sendMouseReport(0, 0, BUTTON_NONE, 0)
         hidDevice?.let {
             if (isRegistered) it.unregisterApp()
             bluetoothAdapter?.closeProfileProxy(BluetoothProfile.HID_DEVICE, it)
         }
     }
 }
-
